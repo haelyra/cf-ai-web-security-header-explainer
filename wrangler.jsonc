@@ -13,6 +13,24 @@
 		"enabled": true
 	},
 	/**
+	 * AI Binding for Workers AI
+	 * https://developers.cloudflare.com/workers-ai/
+	 */
+	"ai": {
+		"binding": "AI"
+	},
+	/**
+	 * KV Namespace for caching header analysis results
+	 * https://developers.cloudflare.com/kv/
+	 */
+	"kv_namespaces": [
+		{
+			"binding": "HEADER_CACHE",
+			"id": "3cb8eb081ed4480e9238675d25681375",
+			"preview_id": "3cb8eb081ed4480e9238675d25681375"
+		}
+	],
+	/**
 	 * Smart Placement
 	 * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
 	 */

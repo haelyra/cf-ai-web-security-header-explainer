@@ -1,17 +1,17 @@
 import type { Route } from "./+types/home";
-import { Welcome } from "../welcome/welcome";
+import { HeaderGuard } from "../components/HeaderGuard";
 
 export function meta({}: Route.MetaArgs) {
 	return [
-		{ title: "New React Router App" },
-		{ name: "description", content: "Welcome to React Router!" },
+		{ title: "HeaderGuard - HTTP Security Header Analyzer" },
+		{
+			name: "description",
+			content:
+				"Analyze HTTP security headers and get recommendations to improve your website's security posture.",
+		},
 	];
 }
 
-export function loader({ context }: Route.LoaderArgs) {
-	return { message: context.cloudflare.env.VALUE_FROM_CLOUDFLARE };
-}
-
-export default function Home({ loaderData }: Route.ComponentProps) {
-	return <Welcome message={loaderData.message} />;
+export default function Home() {
+	return <HeaderGuard />;
 }
