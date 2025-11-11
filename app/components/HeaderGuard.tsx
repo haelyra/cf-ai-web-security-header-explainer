@@ -1,6 +1,4 @@
-// ui
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type {
 	AnalyzeRequest,
 	AnalyzeResponse,
@@ -9,12 +7,34 @@ import type {
 	SecurityIssue,
 } from "../types/api";
 
+const LOADING_MESSAGES = [
+	"Initiating connection...",
+	"Fetching HTTP headers...",
+	"Analyzing security configuration...",
+	"Evaluating header policies...",
+	"Generating recommendations...",
+];
+
 export function HeaderGuard() {
 	const [url, setUrl] = useState("");
 	const [loading, setLoading] = useState(false);
+	const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
 	const [result, setResult] = useState<AnalyzeResponse | null>(null);
 	const [error, setError] = useState<string | null>(null);
 	const [bypassCache, setBypassCache] = useState(false);
+
+	useEffect(() => {
+		if (!loading) {
+			setLoadingMessageIndex(0);
+			return;
+		}
+
+		const interval = setInterval(() => {
+			setLoadingMessageIndex((prev) => (prev + 1) % LOADING_MESSAGES.length);
+		}, 1500);
+
+		return () => clearInterval(interval);
+	}, [loading]);
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -61,7 +81,6 @@ export function HeaderGuard() {
 	return (
 		<main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4">
 			<div className="max-w-4xl mx-auto">
-				{/* Header */}
 				<div className="text-center mb-12">
 					<h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-4">
 						HeaderGuard
@@ -71,7 +90,6 @@ export function HeaderGuard() {
 					</p>
 				</div>
 
-				{/* Input Form */}
 				<div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-8">
 					<form onSubmit={handleSubmit} className="space-y-4">
 						<div>
@@ -114,20 +132,32 @@ export function HeaderGuard() {
 						>
 							{loading ? "Analyzing..." : "Analyze"}
 						</button>
+
+						{loading && (
+							<div className="mt-4 space-y-2">
+								<div className="flex items-center justify-center gap-2 text-blue-600 dark:text-blue-400">
+									<svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+										<circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+										<path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+									</svg>
+									<span className="text-sm font-medium">{LOADING_MESSAGES[loadingMessageIndex]}</span>
+								</div>
+								<div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1 overflow-hidden">
+									<div className="bg-blue-600 h-1 rounded-full animate-pulse" style={{ width: '100%' }}></div>
+								</div>
+							</div>
+						)}
 					</form>
 				</div>
 
-				{/* Error Message */}
 				{error && (
 					<div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-8">
 						<p className="text-red-800 dark:text-red-200">{error}</p>
 					</div>
 				)}
 
-				{/* Results */}
 				{result && (
 					<div className="space-y-6">
-						{/* Warning (CDN, Asset, Non-200, Bot Protection) */}
 						{(result.warning || result.cdnWarning) && (
 							<div className="bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-400 dark:border-yellow-600 rounded-2xl p-6">
 								<div className="flex items-start gap-4">
@@ -214,7 +244,6 @@ export function HeaderGuard() {
 							</div>
 						)}
 
-						{/* Score Badge - Only show if not a warning */}
 						{!result.warning && !result.cdnWarning && (
 							<div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 text-center">
 								<div className="inline-flex items-center justify-center">
@@ -233,7 +262,6 @@ export function HeaderGuard() {
 							</div>
 						)}
 
-						{/* Issues */}
 						{result.issues.length > 0 && (
 							<div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
 								<h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
@@ -268,12 +296,10 @@ function IssueCard({ issue }: IssueCardProps) {
 				<SeverityBadge severity={issue.severity} />
 			</div>
 
-			{/* Explanation */}
 			<p className="text-gray-700 dark:text-gray-300 mb-4">
 				{issue.explanation}
 			</p>
 
-			{/* Header Details */}
 			<div className="space-y-3">
 				<div>
 					<p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
@@ -282,7 +308,6 @@ function IssueCard({ issue }: IssueCardProps) {
 				</div>
 
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-					{/* Current Value */}
 					<div>
 						<p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
 							Current Value:
@@ -294,7 +319,6 @@ function IssueCard({ issue }: IssueCardProps) {
 						</pre>
 					</div>
 
-					{/* Recommended Value */}
 					<div>
 						<p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
 							Recommended Value:
